@@ -1,0 +1,37 @@
+clc; clear;
+% Parameters
+F = 100;         % Flow rate (L/min)
+V = 500;         % Volume (L)
+k1 = 0.2;        % Rate constant for A -> B (1/min)
+k2 = 0.1;        % Rate constant for B -> C (1/min)
+CA0 = 1.0;       % Inlet concentration of A (mol/L)
+CB0 = 0.0;       % Inlet concentration of B (mol/L)
+CC0 = 0.0;       % Inlet concentration of C (mol/L)
+
+% Initial concentrations in reactor
+C_init = [0; 0; 0]; % [CA; CB; CC] inside reactor at t = 0
+
+% Time span
+tspan = [0 100]; % minutes
+
+% ODE system
+ode_multireac = @(t, C) [
+    (F/V)*(CA0 - C(1)) - k1*C(1);                      % dCA/dt
+    (F/V)*(CB0 - C(2)) + k1*C(1) - k2*C(2);            % dCB/dt
+    (F/V)*(CC0 - C(3)) + k2*C(2)                       % dCC/dt
+];
+% Solve
+[t, C] = ode45(ode_multireac, tspan, C_init);
+
+% Extract concentrations
+CA = C(:,1);
+CB = C(:,2);
+CC = C(:,3);
+
+% Plot results
+plot(t, CA, 'b-', t, CB, 'r--', t, CC, 'g-.', 'LineWidth', 2);
+xlabel('Time (min)');
+ylabel('Concentration (mol/L)');
+legend('C_A', 'C_B', 'C_C');
+title('CSTR with A → B → C');
+grid on;
